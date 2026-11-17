@@ -281,6 +281,13 @@ class AnsiToWin32Test(TestCase):
             self.assertTrue(stream.convert)
             self.assertTrue(stream.should_wrap())
 
+    @patch('colorama.ansitowin32.winterm', None)
+    def test_convert_osc_without_convert(self):
+        s = StringIO()
+        stream = AnsiToWin32(s, strip=True, convert=False)
+        stream.write('abc\033]2;my title\007def')
+        self.assertEqual(s.getvalue(), 'abcdef')
+
 
 if __name__ == '__main__':
     main()

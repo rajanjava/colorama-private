@@ -244,6 +244,8 @@ class AnsiToWin32:
                     args = func_args[1:]
                     kwargs = dict(on_stderr=self.on_stderr)
                     func(*args, **kwargs)
+        elif winterm is None:
+            return
         elif command in 'J':
             winterm.erase_screen(params[0], on_stderr=self.on_stderr)
         elif command in 'K':
@@ -268,7 +270,7 @@ class AnsiToWin32:
                     # 0 - change title and icon (we will only change title)
                     # 1 - change icon (we don't support this)
                     # 2 - change title
-                    if params[0] in '02':
+                    if params[0] in '02' and self.convert and winterm:
                         winterm.set_title(params[1])
         return text
 
