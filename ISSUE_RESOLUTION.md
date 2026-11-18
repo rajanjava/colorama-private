@@ -31,6 +31,11 @@ Added in `colorama/tests/ansitowin32_test.py`:
 Prior to the fix:
 `AttributeError: 'NoneType' object has no attribute 'set_title'`
 
+## Solution Approach
+1. **Isolate Platform-Specific Win32 Calls:** In `AnsiToWin32.convert_osc()`, `winterm.set_title()` was invoked even when `convert=False` (or `winterm is None` on Linux/macOS) whenever `strip=True` encountered an OSC title sequence, raising `AttributeError: 'NoneType' object has no attribute 'set_title'`.
+2. **Guard Win32 Title Updates Behind `convert` & `winterm`:** Added a check ensuring `winterm.set_title()` is only called when `self.convert` is enabled and `winterm` is initialized, while still stripping the OSC sequence cleanly when `strip=True`.
+3. **TDD & Regression Safety:** Added `test_convert_osc_without_convert` in `colorama/tests/ansitowin32_test.py` verifying OSC sequences are stripped safely on non-Windows environments.
+
 ## 4. Solution & Code Changes
 In `colorama/ansitowin32.py`:
 - In `convert_osc()`: Guard the `winterm.set_title` call with `if params[0] in '02' and self.convert and winterm:`. When `convert=False` or `winterm is None`, the OSC sequence is cleanly stripped from the output stream without invoking win32 methods.
